@@ -5,7 +5,7 @@
 autoinstall:
   version: 1
 
-  interactive-sessions:
+  interactive-sections:
     - network
     - identity
 
