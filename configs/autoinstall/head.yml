@@ -27,7 +27,7 @@ autoinstall:
   # https://curtin.readthedocs.io/en/latest/topics/storage.html
   storage:
     config:
-      # Wipe and partition the largest disk
+      # DISKS
       - type: disk
         id: disk0
         match:
@@ -38,33 +38,13 @@ autoinstall:
         grub_device: false
 
 
-      # Boot partition
-      - type: partition
-        id: boot-partition
-        number: 1
-        size: 1G
-        device: disk0
-        preserve: false
-        grub_device: true
-        wipe: superblock
+      # PARTITIONS
 
-      - type: format
-        id: boot-format
-        fstype: ext4
-        volume: boot-partition
-        preserve: false
-
-      - type: mount
-        id: boot-mount
-        path: /boot
-        device: boot-format
-
-
-      # EFI partition
+      ## EFI at /boot/efi
       - type: partition
         id: efi-partition
-        number: 2
-        size: 512M
+        number: 1
+        size: 1G
         device: disk0
         flag: boot
         preserve: false
@@ -74,81 +54,119 @@ autoinstall:
       - type: format
         id: efi-format
         fstype: fat32
+        volume: efi-partition
+        preserve: false
+
+      # boot at /boot
+      - type: partition
+        id: boot-partition
+        number: 2
+        size: 1G
+        device: disk0
+        preserve: false
+        grub_device: false
+        wipe: superblock
+
+      - type: format
+        id: boot-format
+        fstype: ext4
         volume: boot-partition
         preserve: false
 
-      - type: mount
-        id: efi-mount
-        path: /boot/efi
-        device: efi-format
-
-      # Swap partition
+      # Swap
       - type: partition
         id: swap-partition
         number: 3
         size: 8G
         device: disk0
         preserve: false
+        grub_device: false
         wipe: superblock
 
       - type: format
         id: swap-format
         fstype: swap
         volume: swap-partition
+        preserve: false
 
       # LVM physical volume
       - type: partition
-        id: pv1
+        id: pv0
         number: 4
-        size: 900G
+        size: 500G
         device: disk0
         preserve: false
+        grub_device: false
         wipe: superblock
 
       - type: lvm_volgroup
-        id: vg1
-        name: vg1
+        id: vg0
+        name: vg0
         devices:
-          - pv1
+          - pv0
+        preserve: false
 
       # Logical volumes
       - type: lvm_partition
-        id: root-vg1
+        id: root-lv
         name: root-lv
-        volgroup: vg1
+        volgroup: vg0
         size: 50G
-        preserve: false
-        wipe: superblock
-
-      - type: lvm_partition
-        id: ihome-vg1
-        name: ihome-lv
-        volgroup: vg1
-        size: 600G
-        preserve: false
-        wipe: superblock
-
-      - type: lvm_partition
-        id: data-vg1
-        name: data-lv
-        volgroup: vg1
         preserve: false
         wipe: superblock
 
       - type: format
         id: root-format
         fstype: ext4
-        volume: root-vg1
+        volume: root-lv
+        preserve: false
+
+
+      - type: lvm_partition
+        id: ihome-lv
+        name: ihome-lv
+        volgroup: vg0
+        size: 350G
+        preserve: false
+        wipe: superblock
 
       - type: format
         id: ihome-format
         fstype: ext4
-        volume: ihome-vg1
+        volume: ihome-lv
+        preserve: false
+
+      - type: lvm_partition
+        id: data-lv
+        name: data-lv
+        volgroup: vg0
+        size: 45G
+        preserve: false
+        wipe: superblock
 
       - type: format
         id: data-format
         fstype: ext4
-        volume: data-vg1
+        volume: data-lv
+        preserve: false
+
+
+      # MOUNTS
+
+      - type: mount
+        id: efi-mount
+        path: /boot/efi
+        device: efi-format
+
+      - type: mount
+        id: boot-mount
+        path: /boot
+        device: boot-format
+
+      - type: mount
+        id: swap-mount
+        path: ''
+        device: swap-format
 
       - type: mount
         id: root-mount
