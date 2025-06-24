@@ -1,0 +1,79 @@
+# Hugo configuration file
+title: LabStack
+baseURL: https://labstack.oasci.org/
+languageCode: en-us
+
+enableGitInfo: true
+
+module:
+  imports:
+    - path: github.com/oasci/crumblearn.org
+
+
+markup:
+  # allow raw html
+  goldmark:
+    renderer:
+      unsafe: true
+    extensions:
+      passthrough:
+        delimiters:
+          block: [['\[', '\]'], ['$$', '$$']]
+          inline: [['\(', '\)'], ['$', '$']]
+        enable: true
+
+  # enable hextra syntax highlight
+  highlight:
+    noClasses: false
+
+menu:
+  main:
+    - name: Getting started
+      pageRef: /getting-started
+      weight: 1
+    - name: Head Node
+      pageRef: /head
+      weight: 2
+    - name: Search
+      weight: 9
+      params:
+        type: search
+    - name: GitHub
+      weight: 10
+      url: "https://github.com/oasci/"
+      params:
+        icon: github
+
+params:
+  navbar:
+    displayTitle: true
+    displayLogo: true
+    logo:
+      path: img/logo.svg
+    width: wide
+  
+  page:
+    width: wide
+  
+  theme:
+    default: system
+    displayToggle: true
+
+  footer:
+    enable: true
+    displayCopyright: false
+    displayPoweredBy: true
+    width: normal
+  
+  displayUpdatedDate: true
+  dateFormat: "January 2, 2006"
+
+  search:
+    enable: true
+    type: flexsearch
+  
+  highlight:
+    copy:
+      enable: true
+      # hover | always
+      display: hover

@@ -1,0 +1,171 @@
+# Ubuntu autoinstall configuration
+# More information can be found here:
+# https://canonical-subiquity.readthedocs-hosted.com/en/latest/reference/autoinstall-reference.html
+
+autoinstall:
+  version: 1
+
+  interactive-sessions:
+    - network
+    - identity
+
+  locale: "en_US.UTF-8"
+
+  keyboard:
+    layout: us
+    variant: ""
+    toggle: null
+
+  source:
+    search_drivers: true
+    id: ubuntu-server
+
+  proxy: null
+
+  # For more information:
+  # https://canonical-subiquity.readthedocs-hosted.com/en/latest/reference/autoinstall-reference.html#storage
+  # https://curtin.readthedocs.io/en/latest/topics/storage.html
+  storage:
+    config:
+      # Wipe and partition the largest disk
+      - type: disk
+        id: disk0
+        match:
+          size: largest
+        ptable: gpt
+        wipe: superblock-recursive
+        preserve: false
+
+      # Boot partition
+      - type: partition
+        id: boot-partition
+        name: boot
+        number: 1
+        size: 1G
+        device: disk0
+        flag: boot
+
+      - type: format
+        id: boot-format
+        fstype: fat32
+        volume: boot-partition
+
+      # Swap partition
+      - type: partition
+        id: swap-partition
+        name: swap
+        number: 2
+        size: 8G
+        device: disk0
+
+      - type: format
+        id: swap-format
+        fstype: swap
+        volume: swap-partition
+
+      # LVM physical volume
+      - type: partition
+        id: pv1
+        name: lvm
+        number: 3
+        size: -1
+        device: disk0
+
+      - type: lvm_volgroup
+        id: vg1
+        name: vg1
+        devices:
+          - pv1
+
+      # Logical volumes
+      - type: lvm_partition
+        id: root-vg1
+        volgroup: vg1
+        size: 18%
+
+      - type: lvm_partition
+        id: ihome-vg1
+        volgroup: vg1
+        size: 60%
+
+      - type: lvm_partition
+        id: data-vg1
+        volgroup: vg1
+        size: 20%
+
+      # Formats
+      - type: format
+        id: root-format
+        fstype: ext4
+        volume: root-vg1
+
+      - type: format
+        id: ihome-format
+        fstype: ext4
+        volume: ihome-vg1
+
+      - type: format
+        id: data-format
+        fstype: ext4
+        volume: data-vg1
+
+      # Mounts
+      - type: mount
+        id: boot-mount
+        path: /boot
+        device: boot-partition
+
+      - type: mount
+        id: root-mount
+        path: /
+        device: root-format
+
+      - type: mount
+        id: ihome-mount
+        path: /ihome
+        device: ihome-format
+
+      - type: mount
+        id: data-mount
+        path: /data
+        device: data-format
+
+  ssh:
+    install-server: true
+    authorized-keys: []
+    allow-pw: false
+
+  drivers:
+    install: true
+
+  oem:
+    install: false
+
+  packages:
+    - build-essential
+    - git
+    - nfs-common
+    - nfs-kernel-server
+    - curl
+    - wget
+    - cmake
+    - automake
+    - autoconf
+    - software-properties-common
+    - python3
+    - python3-pip
+    - python3-venv
+    - htop
+    - tmux
+    - tree
+    - net-tools
+    - iproute2
+    - vim
+    - nano
+    - rsync
+
+  timezone: "US/Eastern"
+
+  updates: all
+
+  shutdown: reboot
