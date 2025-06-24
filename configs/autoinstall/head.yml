@@ -35,28 +35,61 @@ autoinstall:
         ptable: gpt
         wipe: superblock-recursive
         preserve: false
+        grub_device: false
+
 
       # Boot partition
       - type: partition
         id: boot-partition
-        name: boot
         number: 1
         size: 1G
         device: disk0
-        flag: boot
+        preserve: false
+        grub_device: true
+        wipe: superblock
 
       - type: format
         id: boot-format
+        fstype: ext4
+        volume: boot-partition
+        preserve: false
+
+      - type: mount
+        id: boot-mount
+        path: /boot
+        device: boot-format
+
+
+      # EFI partition
+      - type: partition
+        id: efi-partition
+        number: 2
+        size: 512M
+        device: disk0
+        flag: boot
+        preserve: false
+        grub_device: true
+        wipe: superblock
+
+      - type: format
+        id: efi-format
         fstype: fat32
         volume: boot-partition
+        preserve: false
+
+      - type: mount
+        id: efi-mount
+        path: /boot/efi
+        device: efi-format
 
       # Swap partition
       - type: partition
         id: swap-partition
-        name: swap
-        number: 2
+        number: 3
         size: 8G
         device: disk0
+        preserve: false
+        wipe: superblock
 
       - type: format
         id: swap-format
@@ -66,10 +99,11 @@ autoinstall:
       # LVM physical volume
       - type: partition
         id: pv1
-        name: lvm
-        number: 3
-        size: -1
+        number: 4
+        size: 900G
         device: disk0
+        preserve: false
+        wipe: superblock
 
       - type: lvm_volgroup
         id: vg1
@@ -80,20 +114,27 @@ autoinstall:
       # Logical volumes
       - type: lvm_partition
         id: root-vg1
+        name: root-lv
         volgroup: vg1
-        size: 18%
+        size: 50G
+        preserve: false
+        wipe: superblock
 
       - type: lvm_partition
         id: ihome-vg1
+        name: ihome-lv
         volgroup: vg1
-        size: 60%
+        size: 600G
+        preserve: false
+        wipe: superblock
 
       - type: lvm_partition
         id: data-vg1
+        name: data-lv
         volgroup: vg1
-        size: 20%
+        preserve: false
+        wipe: superblock
 
-      # Formats
       - type: format
         id: root-format
         fstype: ext4
@@ -108,12 +149,6 @@ autoinstall:
         id: data-format
         fstype: ext4
         volume: data-vg1
-
-      # Mounts
-      - type: mount
-        id: boot-mount
-        path: /boot
-        device: boot-partition
 
       - type: mount
         id: root-mount
