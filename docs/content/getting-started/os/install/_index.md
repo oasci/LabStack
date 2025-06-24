@@ -8,7 +8,7 @@ Ubuntu provides an [autoinstall framework](https://canonical-subiquity.readthedo
 > [!TIP] Use Linux!
 > We assume you are using a Linux-based operating system for this step.
 
-## Downloading
+## Download
 
 You can go to the [Ubuntu website to download the server operating system](https://ubuntu.com/download/server).
 We always recommend using the Long-Term Support (LTS) release because of its extensive testing and reliability.
@@ -53,11 +53,11 @@ sda           8:0    1  28.6G  0 disk
 ```
 
 Since the `MOUNTPOINTS` column is empty, our USB is not mounted.
-If yours is, you can unmount it by using the command `sudo unmount /dev/sda1` (if the `sda1` partition was mounted).
+If yours is, you can unmount it by using the command `sudo umount /dev/sda1` (if the `sda1` partition was mounted).
 
 
-We have to remove all partitions of the USB drive and put one for fat32 for the OS.
-Ensure that your fat32 partition is large enough for the whole ISO.
+We have to remove all partitions of the USB drive and put one for FAT32 for the OS.
+Ensure that your FAT32 partition is large enough for the whole ISO.
 In our case, we use 4000 MB.
 
 ```bash
@@ -67,28 +67,38 @@ $ sudo parted /dev/sda --script \
   set 1 boot on
 ```
 
-Now we need to format the partition for the ISO with fat32.
+Now we need to format the partition for the ISO with FAT32.
+
+```bash
+$ sudo mkfs.vfat -F32 /dev/sda1
+```
 
 > [!important]
 > Make sure you have [`dosfstools`](https://github.com/dosfstools/dosfstools) installed.
 > On arch, this would be
 >
 > ```bash
-> $ sudo pacman -Syu dosfstools`
+> $ sudo pacman -Syu dosfstools
 > ```
 
+Now we can mount the USB.
+
 ```bash
-$ sudo mkfs.vfat -F32 /dev/sda1
+$ sudo mkdir -p /mnt/usb
+$ sudo mount /dev/sda1 /mnt/usb
 ```
 
-To copy over the ISO file, we first have to mount the fat32 partition.
+### Writing ISO
+
+We first have to mount the ISO file.
 
 ```bash
 $ sudo mkdir -p /mnt/iso
-$ sudo mount -o loop ~/Downloads/ubuntu-24.04.2-live-server-amd64.iso /mnt/iso
+$ sudo mount -o loop path/to/ubuntu-xx.yy.z-live-server-amd64.iso /mnt/iso
 ```
 
-Copy everything from the iso.
+
+Copy everything from the ISO to the USB.
 
 ```bash
 $ sudo cp -rT /mnt/iso/ /mnt/usb/
@@ -101,4 +111,6 @@ You are all set to boot into Ubuntu from the USB!
 Partitions from the ISO are inherently read-only.
 We will need to write files to our USB, so we need to add a writeable partition.
 
-
+```bash
+sudo cp path/to/autoinstall.yml /mnt/usb/autoinstall.yml
+```
