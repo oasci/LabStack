@@ -12,7 +12,7 @@ toc: false
 
 <div class="hx-mb-8">
 {{< hextra/hero-subtitle >}}
-  TODO
+  Compute infrastructure management for academic research labs
 {{< /hextra/hero-subtitle >}}
 </div>
 
