@@ -1,11 +1,13 @@
 ---
-title: Installation
+title: Live disk
+weight: 1
+type: docs
+toc: true
 ---
 
-Manually installing operating systems across many bare-metal servers is a tedious process.
-Ubuntu provides an [autoinstall framework](https://canonical-subiquity.readthedocs-hosted.com/en/latest/) [through subiquity](https://github.com/canonical/subiquity).
+Installing the operating system onto a computer involves creating a portal media, often a USB drive, that contains a full, bootable operating system (OS).
 
-> [!TIP] Use Linux!
+> [!IMPORTANT] Use Linux!
 > We assume you are using a Linux-based operating system for this step.
 
 ## Download
@@ -14,15 +16,14 @@ You can go to the [Ubuntu website to download the server operating system](https
 We always recommend using the Long-Term Support (LTS) release because of its extensive testing and reliability.
 LTS releases are provided every two years and are supported (i.e., security updates and bug fixes) for five years.
 
-## Live USB
+### ISO file
 
-Installing the operating system onto a computer involves creating a portal media, often a USB drive, that contains a full, bootable OS.
 An [ISO file](https://en.wikipedia.org/wiki/Optical_disc_image) is commonly used to store the operating system.
 
 > [!INFO] Fun fact
 > ISO files originate from the [ISO 9660](https://en.wikipedia.org/wiki/ISO_9660) file system for optical disks.
 
-### Preparation
+## Mount USB
 
 > [!TIP]
 > You can find more information about this on the [Arch wiki](https://wiki.archlinux.org/title/USB_flash_installation_medium).
@@ -58,12 +59,12 @@ If yours is, you can unmount it by using the command `sudo umount /dev/sda1` (if
 
 We have to remove all partitions of the USB drive and put one for FAT32 for the OS.
 Ensure that your FAT32 partition is large enough for the whole ISO.
-In our case, we use 4000 MB.
+In our case, we use 5G.
 
 ```bash
 $ sudo parted /dev/sda --script \
   mklabel msdos \
-  mkpart primary fat32 1MiB 4000MiB \
+  mkpart primary fat32 1MiB 5GiB \
   set 1 boot on
 ```
 
@@ -88,29 +89,24 @@ $ sudo mkdir -p /mnt/usb
 $ sudo mount /dev/sda1 /mnt/usb
 ```
 
-### Writing ISO
+## Mount ISO
 
 We first have to mount the ISO file.
 
 ```bash
 $ sudo mkdir -p /mnt/iso
-$ sudo mount -o loop path/to/ubuntu-xx.yy.z-live-server-amd64.iso /mnt/iso
+$ sudo mount -o loop path/to/os.iso /mnt/iso
 ```
 
+## Write ISO
 
 Copy everything from the ISO to the USB.
 
 ```bash
-$ sudo cp -rT /mnt/iso/ /mnt/usb/
+$ sudo cp -aT /mnt/iso/. /mnt/usb/
 ```
 
-You are all set to boot into Ubuntu from the USB!
+## Done!
 
-### Persistence
-
-Partitions from the ISO are inherently read-only.
-We will need to write files to our USB, so we need to add a writeable partition.
-
-```bash
-sudo cp path/to/autoinstall.yml /mnt/usb/autoinstall.yml
-```
+At this stage, you are all set to boot into Ubuntu from the USB!
+However, we recommend setting up [autoinstall](../autoinstall) to make setting up new computers a breeze.
