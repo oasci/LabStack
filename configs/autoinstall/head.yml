@@ -31,7 +31,7 @@ autoinstall:
       - type: disk
         id: disk0
         match:
-          size: largest
+          size: smallest
         ptable: gpt
         wipe: superblock-recursive
         preserve: false
